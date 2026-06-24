@@ -1,0 +1,19 @@
+OUTDIR ?= build_out
+PROFILE ?= mqtt_field_bridge
+WEB_DIR := products/$(PROFILE)/web
+HEADER := $(OUTDIR)/provisioning_index.h
+
+.PHONY: test clean
+
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+$(HEADER): tools/embed_web.js $(WEB_DIR)/index.html $(WEB_DIR)/styles.css $(WEB_DIR)/app.js | $(OUTDIR)
+	node tools/embed_web.js $(WEB_DIR) $(HEADER) index_html
+
+test: $(HEADER)
+	test -s $(HEADER)
+	grep -q "Field Bridge Settings" $(HEADER)
+
+clean:
+	rm -rf $(OUTDIR)
