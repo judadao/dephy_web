@@ -1,0 +1,5 @@
+todos:
+  - id: web-profile-manifest
+    status: pending
+    title: Add per-profile manifest files
+    notes: Product profiles are currently identified by path and release tag.

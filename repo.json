@@ -1,0 +1,7 @@
+{
+  "name": "dephy_web",
+  "type": "dephy-module",
+  "language": "c-web-assets",
+  "zephyr_module": true,
+  "description": "Reusable web asset profiles and embed tooling for Dephy products"
+}

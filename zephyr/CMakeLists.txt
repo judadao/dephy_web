@@ -1,0 +1,6 @@
+if(CONFIG_DEPHY_WEB)
+  zephyr_library_named(dephy_web)
+  zephyr_library_sources(../src/web_profile.c)
+  zephyr_library_include_directories(../include)
+  zephyr_include_directories(../include)
+endif()

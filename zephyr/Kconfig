@@ -1,0 +1,5 @@
+menuconfig DEPHY_WEB
+	bool "Dephy web profile metadata"
+	default n
+	help
+	  Enable reusable Dephy web profile metadata.

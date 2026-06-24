@@ -1,0 +1,9 @@
+menu "Dephy Web"
+
+config DEPHY_WEB
+	bool "Enable Dephy web profile metadata"
+	default n
+	help
+	  Enable generic Dephy web profile metadata.
+
+endmenu

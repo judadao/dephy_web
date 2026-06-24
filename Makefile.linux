@@ -1,19 +1,26 @@
+CC ?= gcc
+CFLAGS ?= -Wall -Wextra -std=c11 -g
 OUTDIR ?= build_out
 PROFILE ?= mqtt_field_bridge
 WEB_DIR := products/$(PROFILE)/web
 HEADER := $(OUTDIR)/provisioning_index.h
+UNIT := $(OUTDIR)/unit_web_profile
 
 .PHONY: test clean
 
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
+$(UNIT): tests/unit_web_profile.c src/web_profile.c include/dephy_web/web_profile.h | $(OUTDIR)
+	$(CC) $(CFLAGS) -Iinclude tests/unit_web_profile.c src/web_profile.c -o $@
+
 $(HEADER): tools/embed_web.js $(WEB_DIR)/index.html $(WEB_DIR)/styles.css $(WEB_DIR)/app.js | $(OUTDIR)
 	node tools/embed_web.js $(WEB_DIR) $(HEADER) index_html
 
-test: $(HEADER)
+test: $(HEADER) $(UNIT)
 	test -s $(HEADER)
 	grep -q "Field Bridge Settings" $(HEADER)
+	$(UNIT)
 
 clean:
 	rm -rf $(OUTDIR)
