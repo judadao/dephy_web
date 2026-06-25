@@ -65,10 +65,10 @@ button:disabled{opacity:.55;cursor:wait}
 .warn{color:var(--warn)}
 .save-toast{position:fixed;right:20px;bottom:20px;z-index:10;box-shadow:0 8px 24px rgba(15,23,42,.18)}
 .modal-backdrop{position:fixed;inset:0;z-index:20;background:rgba(15,23,42,.38);display:grid;place-items:center;padding:18px}
-.modal{width:min(420px,100%);border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px;box-shadow:0 18px 50px rgba(15,23,42,.28)}
-.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.modal{width:min(420px,100%);border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:18px;box-shadow:0 18px 50px rgba(15,23,42,.28);text-align:center}
+.modal-head{display:grid;gap:12px;justify-items:center;margin-bottom:12px}
 .modal-head h2{margin:0}
-.operation-result{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:10px 12px;font-weight:700;overflow-wrap:anywhere}
+.operation-result{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:10px 12px;font-weight:700;overflow-wrap:anywhere;text-align:center}
 .broker-panel{display:grid;gap:12px;margin-bottom:12px}
 .bridge-status-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-top:10px}
 .bridge-current-card,.bridge-log-card,.broker-list-panel{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:12px}

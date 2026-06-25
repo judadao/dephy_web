@@ -4,6 +4,7 @@ const st = $('status');
 const ss = $('save-state');
 const op = $('operation-result');
 const opDialog = $('operation-dialog');
+const opClose = $('operation-close');
 
 let cfg = {};
 let peers = [];
@@ -46,14 +47,16 @@ function norm(p) {
 function notice(msg, cls = 'muted', hold = 1800, popup = true) {
   clearTimeout(saveTimer);
   clearTimeout(popupTimer);
+  const isError = cls === 'bad' || cls === 'err';
   ss.textContent = msg;
   ss.className = `pill ${cls} save-toast`;
   ss.classList.remove('hide');
   op.textContent = msg;
   op.className = `operation-result ${cls}`;
+  opClose.classList.toggle('hide', !isError);
   if (popup) {
     opDialog.classList.remove('hide');
-    popupTimer = setTimeout(() => opDialog.classList.add('hide'), 2000);
+    if (!isError) popupTimer = setTimeout(() => opDialog.classList.add('hide'), 2000);
   }
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
@@ -287,7 +290,7 @@ function showTab(id) {
 
 for (const b of document.querySelectorAll('.tab')) b.onclick = () => showTab(b.dataset.tab);
 $('refresh').onclick = load;
-$('operation-close').onclick = () => opDialog.classList.add('hide');
+opClose.onclick = () => opDialog.classList.add('hide');
 opDialog.onclick = e => {
   if (e.target === opDialog) opDialog.classList.add('hide');
 };
