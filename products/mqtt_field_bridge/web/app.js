@@ -9,7 +9,6 @@ const opClose = $('operation-close');
 let cfg = {};
 let peers = [];
 let peerStatus = [];
-let selectedPeerIndex = 0;
 let saveTimer = 0;
 let popupTimer = 0;
 
@@ -39,9 +38,14 @@ function norm(p) {
     name: p.name || '',
     host: p.host || '',
     mqtt_port: +(p.mqtt_port || 1883),
-    p2p_port: +(p.p2p_port || 4884),
+    p2p_port: +(p.p2p_port || deriveP2pPort(p.mqtt_port || 1883)),
     enabled: p.enabled ? 1 : 0,
   };
+}
+
+function deriveP2pPort(mqttPort) {
+  const port = +(mqttPort || 1883);
+  return port <= 62534 ? port + 3001 : 4884;
 }
 
 function notice(msg, cls = 'muted', hold = 1800, popup = true) {
@@ -75,24 +79,6 @@ function peerState(i) {
   return peerStatus.find(x => +x.index === +i) || {};
 }
 
-function renderPeerSelector() {
-  const select = $('bridge_peer_index');
-  const current = Number.isInteger(selectedPeerIndex) ? selectedPeerIndex : +(select.value || 0);
-  select.innerHTML = peers.map((p, i) => {
-    const x = norm(p);
-    const label = x.enabled
-      ? `Broker ${i} - ${x.name || x.host || 'configured'}`
-      : `Broker ${i} - empty`;
-    return `<option value="${i}">${esc(label)}</option>`;
-  }).join('');
-  if (!peers.length) {
-    select.innerHTML = '<option value="0">Broker 0</option>';
-  }
-  const max = Math.max(0, peers.length - 1);
-  selectedPeerIndex = Math.min(Math.max(current, 0), max);
-  select.value = String(selectedPeerIndex);
-}
-
 function row(p, i) {
   p = norm(p);
   const s = peerState(i);
@@ -105,13 +91,11 @@ function row(p, i) {
       <label>Name<input id="peer_name_${i}" value="${esc(p.name)}" maxlength="31"></label>
       <label>Host / IP<input id="peer_host_${i}" value="${esc(p.host)}" maxlength="63"></label>
       <label>MQTT Port<input id="peer_mqtt_${i}" type="number" min="1" max="65535" value="${p.mqtt_port}"></label>
-      <label>P2P Port<input id="peer_p2p_${i}" type="number" min="1" max="65535" value="${p.p2p_port}"></label>
       <label>Enabled<input id="peer_enabled_${i}" type="checkbox" ${p.enabled ? 'checked' : ''}></label>
     </div>
     <div class="peer-summary-grid">
       <div><span>Host</span><strong>${esc(p.host || '-')}</strong></div>
       <div><span>MQTT</span><strong>${p.mqtt_port || '-'}</strong></div>
-      <div><span>P2P</span><strong>${p.p2p_port || '-'}</strong></div>
       <div><span>Runtime</span><strong>${esc(s.state || '-')}</strong></div>
       <div><span>Error</span><strong>${esc(s.last_error || '-')}</strong></div>
       <div><span>Enabled</span><strong>${p.enabled ? 'yes' : 'no'}</strong></div>
@@ -121,11 +105,8 @@ function row(p, i) {
 }
 
 function renderPeers() {
-  renderPeerSelector();
   form.innerHTML = peers.map((p, i) => row(p, i)).join('');
   $('peer-empty').classList.toggle('hide', peers.length > 0);
-  $('peer-current-state').textContent = `${peers.filter(p => norm(p).enabled).length} enabled`;
-  $('peer-current-state').className = 'pill ok';
 }
 
 function put(c) {
@@ -174,7 +155,6 @@ async function savePeer(i) {
     name: $(`peer_name_${i}`).value,
     host: $(`peer_host_${i}`).value,
     mqtt_port: +($(`peer_mqtt_${i}`).value || 1883),
-    p2p_port: +($(`peer_p2p_${i}`).value || 4884),
     enabled: $(`peer_enabled_${i}`).checked ? 1 : 0,
   };
   try {
@@ -183,7 +163,6 @@ async function savePeer(i) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    selectedPeerIndex = i;
     await loadPeers();
     notice('Save success', 'ok', 2000);
   } catch (x) {
@@ -300,9 +279,5 @@ $('save-broker').onclick = () => saveConfig('Broker');
 $('mesh_enabled').onchange = () => saveConfig('Bridge Routing');
 $('broker-start').onclick = () => brokerControl(1);
 $('broker-stop').onclick = () => brokerControl(0);
-$('bridge_peer_index').onchange = () => {
-  selectedPeerIndex = +($('bridge_peer_index').value || 0);
-};
-
 load().catch(x => failMsg(x, 'Load failed'));
 setInterval(refreshRuntime, 3000);
