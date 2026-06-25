@@ -2,6 +2,7 @@ const $ = id => document.getElementById(id);
 const form = $('peer-form');
 const st = $('status');
 const ss = $('save-state');
+const op = $('operation-result');
 
 let cfg = {};
 let peers = [];
@@ -45,6 +46,8 @@ function notice(msg, cls = 'muted', hold = 1800) {
   ss.textContent = msg;
   ss.className = `pill ${cls} save-toast`;
   ss.classList.remove('hide');
+  op.textContent = msg;
+  op.className = `operation-result ${cls}`;
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
 
