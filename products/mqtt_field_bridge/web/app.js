@@ -56,7 +56,7 @@ function notice(msg, cls = 'muted', hold = 1800, popup = true) {
   opClose.classList.toggle('hide', !isError);
   if (popup) {
     opDialog.classList.remove('hide');
-    if (!isError) popupTimer = setTimeout(() => opDialog.classList.add('hide'), 2000);
+    if (!isError) popupTimer = setTimeout(() => opDialog.classList.add('hide'), 1000);
   }
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
