@@ -123,12 +123,18 @@ function put(c) {
   $('summary-gateway').textContent = c.gateway || '-';
   $('summary-netmask').textContent = c.netmask || '-';
   $('summary-dns').textContent = c.dns || '-';
+  $('wifi_device_ip').value = c.device_ip || '';
+  $('wifi_gateway').value = c.gateway || '';
+  $('wifi_netmask').value = c.netmask || '';
+  $('wifi_dns').value = c.dns || '';
+  $('wifi_dhcp_enabled').checked = !!c.dhcp_enabled;
 }
 
 function collect() {
   const bridge = $('mesh_enabled').checked ? 1 : 0;
   return {
     device_name: $('device_name').value,
+    wifi_ssid: $('wifi_ssid').value,
     device_ip: $('device_ip').value,
     gateway: $('gateway').value,
     netmask: $('netmask').value,
@@ -249,6 +255,30 @@ async function brokerControl(enabled) {
   }
 }
 
+async function connectWifi() {
+  const body = {
+    wifi_ssid: $('wifi_ssid').value,
+    wifi_password: $('wifi_password').value,
+    device_ip: $('wifi_device_ip').value,
+    gateway: $('wifi_gateway').value,
+    netmask: $('wifi_netmask').value,
+    dns: $('wifi_dns').value,
+    dhcp_enabled: $('wifi_dhcp_enabled').checked ? 1 : 0,
+  };
+  try {
+    await json('/wifi/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    notice('WiFi connect saved', 'ok', 2000);
+    setRebooting();
+    await json('/reboot', { method: 'POST' });
+  } catch (x) {
+    failMsg(x, 'Connect failed');
+  }
+}
+
 async function refreshRuntime() {
   try {
     await loadStatus();
@@ -276,6 +306,7 @@ opDialog.onclick = e => {
 $('reset-config-network').onclick = resetConfig;
 $('save-network').onclick = () => saveConfig('Network');
 $('save-broker').onclick = () => saveConfig('Broker');
+$('wifi-connect-save').onclick = connectWifi;
 $('mesh_enabled').onchange = () => saveConfig('Bridge Routing');
 $('broker-start').onclick = () => brokerControl(1);
 $('broker-stop').onclick = () => brokerControl(0);

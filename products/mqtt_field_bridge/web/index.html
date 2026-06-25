@@ -84,6 +84,7 @@
 <h2 class="section-title">Settings</h2>
 <nav class="tabs">
 <button class="tab active" data-tab="network">Network</button>
+<button class="tab" data-tab="wifi-connect">WiFi Connect</button>
 <button class="tab" data-tab="broker">Broker</button>
 <button class="tab" data-tab="peers">Bridge Peers</button>
 </nav>
@@ -102,7 +103,7 @@
 <div class="grid">
 <label>Device Name<input id="device_name" maxlength="31">
 </label>
-<label>Ethernet IP<input id="device_ip" maxlength="63">
+<label>Device IP<input id="device_ip" maxlength="63">
 </label>
 <label>Gateway<input id="gateway" maxlength="63">
 </label>
@@ -114,6 +115,36 @@
 <div class="actions">
 <button type="button" id="save-network">Save Network</button>
 <button type="button" id="reset-config-network" class="danger">Reset Config</button>
+</div>
+</section>
+<section id="wifi-connect" class="panel view hide">
+<h2>WiFi Connect</h2>
+<div class="grid">
+<label>SSID<input id="wifi_ssid" maxlength="63">
+</label>
+<label>Password<input id="wifi_password" maxlength="63" type="password">
+</label>
+<label>Device IP<input id="wifi_device_ip" maxlength="63">
+</label>
+<label>Gateway<input id="wifi_gateway" maxlength="63">
+</label>
+<label>Netmask<input id="wifi_netmask" maxlength="63">
+</label>
+<label>DNS<input id="wifi_dns" maxlength="63">
+</label>
+</div>
+<div class="feature-row">
+<div>
+<div class="feature-title">Address Mode</div>
+<div class="muted small">Use static IP for deterministic broker addresses</div>
+</div>
+<div class="feature-detail">
+<label>DHCP Enabled<input id="wifi_dhcp_enabled" type="checkbox">
+</label>
+</div>
+</div>
+<div class="actions">
+<button type="button" id="wifi-connect-save">Connect</button>
 </div>
 </section>
 <section id="broker" class="panel view hide">
