@@ -18,7 +18,9 @@
 </header>
 <main>
 <section id="app">
-<section class="hero">
+<section class="dashboard-section">
+<h2 class="section-title">Dashboard</h2>
+<div class="hero">
 <div class="panel">
 <h2>Overview</h2>
 <table class="kv">
@@ -65,18 +67,25 @@
 </tr>
 </table>
 </div>
+</div>
 </section>
 <div id="save-state" class="pill muted save-toast hide" role="status" aria-live="polite">
 </div>
-<section class="panel operation-panel">
-<h2>Operation Result</h2>
+<div id="operation-dialog" class="modal-backdrop hide" role="dialog" aria-modal="true" aria-labelledby="operation-title">
+<div class="modal">
+<div class="modal-head">
+<h2 id="operation-title">Operation Result</h2>
+<button type="button" id="operation-close" class="secondary">Close</button>
+</div>
 <div id="operation-result" class="operation-result muted" role="status" aria-live="polite">Ready</div>
-</section>
+</div>
+</div>
+<section class="settings-section">
+<h2 class="section-title">Settings</h2>
 <nav class="tabs">
 <button class="tab active" data-tab="network">Network</button>
 <button class="tab" data-tab="broker">Broker</button>
 <button class="tab" data-tab="peers">Bridge Peers</button>
-<button class="tab" data-tab="system">System</button>
 </nav>
 <section id="network" class="panel view">
 <h2>Network Setting</h2>
@@ -91,6 +100,8 @@
 </div>
 </div>
 <div class="grid">
+<label>Device Name<input id="device_name" maxlength="31">
+</label>
 <label>Ethernet IP<input id="device_ip" maxlength="63">
 </label>
 <label>Gateway<input id="gateway" maxlength="63">
@@ -182,16 +193,6 @@
 </div>
 </div>
 </section>
-<section id="system" class="panel view hide">
-<h2>System Setting</h2>
-<div class="grid">
-<label>Device Name<input id="device_name" maxlength="31">
-</label>
-</div>
-<div class="actions">
-<button type="button" id="save-system">Save System</button>
-<button type="button" id="reset-config" class="danger">Reset Config</button>
-</div>
 </section>
 </section>
 </main>

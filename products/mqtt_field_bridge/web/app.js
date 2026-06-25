@@ -3,6 +3,7 @@ const form = $('peer-form');
 const st = $('status');
 const ss = $('save-state');
 const op = $('operation-result');
+const opDialog = $('operation-dialog');
 
 let cfg = {};
 let peers = [];
@@ -48,6 +49,7 @@ function notice(msg, cls = 'muted', hold = 1800) {
   ss.classList.remove('hide');
   op.textContent = msg;
   op.className = `operation-result ${cls}`;
+  opDialog.classList.remove('hide');
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
 
@@ -276,8 +278,10 @@ function showTab(id) {
 
 for (const b of document.querySelectorAll('.tab')) b.onclick = () => showTab(b.dataset.tab);
 $('refresh').onclick = load;
-$('save-system').onclick = () => saveConfig('System');
-$('reset-config').onclick = resetConfig;
+$('operation-close').onclick = () => opDialog.classList.add('hide');
+opDialog.onclick = e => {
+  if (e.target === opDialog) opDialog.classList.add('hide');
+};
 $('reset-config-network').onclick = resetConfig;
 $('save-network').onclick = () => saveConfig('Network');
 $('save-broker').onclick = () => saveConfig('Broker');
