@@ -10,6 +10,7 @@ let peers = [];
 let peerStatus = [];
 let selectedPeerIndex = 0;
 let saveTimer = 0;
+let popupTimer = 0;
 
 function esc(s) {
   return String(s || '').replace(/[&<>"]/g, c => ({
@@ -42,24 +43,29 @@ function norm(p) {
   };
 }
 
-function notice(msg, cls = 'muted', hold = 1800) {
+function notice(msg, cls = 'muted', hold = 1800, popup = true) {
   clearTimeout(saveTimer);
+  clearTimeout(popupTimer);
   ss.textContent = msg;
   ss.className = `pill ${cls} save-toast`;
   ss.classList.remove('hide');
   op.textContent = msg;
   op.className = `operation-result ${cls}`;
-  opDialog.classList.remove('hide');
+  if (popup) {
+    opDialog.classList.remove('hide');
+    popupTimer = setTimeout(() => opDialog.classList.add('hide'), 2000);
+  }
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
 
-function failMsg(x, prefix) {
-  let m = x && x.message ? x.message : 'failed';
+function failMsg(x, prefix = 'Save failed') {
+  let m = prefix;
   try {
-    const j = JSON.parse(m);
-    if (j.error) m = j.error;
+    const raw = x && x.message ? x.message : '';
+    const j = JSON.parse(raw);
+    if (j.error && prefix !== 'Save failed') m = `${prefix}: ${j.error}`;
   } catch (e) {}
-  notice(`${prefix}: ${m}`, 'bad', 0);
+  notice(m, 'bad', 2000);
 }
 
 function peerState(i) {
@@ -169,7 +175,6 @@ async function savePeer(i) {
     enabled: $(`peer_enabled_${i}`).checked ? 1 : 0,
   };
   try {
-    notice(`Saving broker ${i}`, 'muted', 0);
     await json(`/peers/${i}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -177,9 +182,9 @@ async function savePeer(i) {
     });
     selectedPeerIndex = i;
     await loadPeers();
-    notice(`Broker ${i} saved`, 'ok');
+    notice('Save success', 'ok', 2000);
   } catch (x) {
-    failMsg(x, `Save broker ${i} failed`);
+    failMsg(x);
   }
 }
 
@@ -202,8 +207,6 @@ function renderStatus(s) {
 }
 
 async function loadStatus() {
-  st.textContent = 'Loading';
-  st.className = 'pill muted';
   const s = await json('/status');
   renderStatus(s);
   return s;
@@ -221,49 +224,55 @@ async function load() {
 
 async function saveConfig(part) {
   try {
-    notice('Saving', 'muted', 0);
     const result = await json('/config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(collect()),
     });
     if (result.reboot_required || part === 'Network' || part === 'Broker') {
-      notice(`${part} saved, rebooting`, 'warn', 0);
+      notice('Save success', 'ok', 2000);
       setRebooting();
       await json('/reboot', { method: 'POST' });
       return;
     }
     await load();
-    notice(`${part} saved`, 'ok');
+    notice('Save success', 'ok', 2000);
   } catch (x) {
-    failMsg(x, 'Save failed');
+    failMsg(x);
   }
 }
 
 async function resetConfig() {
   try {
-    notice('Resetting', 'muted', 0);
     await json('/config/reset', { method: 'POST' });
-    notice('Config reset, rebooting', 'warn', 0);
+    notice('Save success', 'ok', 2000);
     setRebooting();
     await json('/reboot', { method: 'POST' });
   } catch (x) {
-    failMsg(x, 'Reset failed');
+    failMsg(x);
   }
 }
 
 async function brokerControl(enabled) {
   try {
-    notice(enabled ? 'Starting broker' : 'Stopping broker', 'muted', 0);
     await json('/broker/control', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled }),
     });
     await load();
-    notice(enabled ? 'Broker start requested' : 'Broker stopped', 'ok');
+    notice('Save success', 'ok', 2000);
   } catch (x) {
-    failMsg(x, 'Broker control failed');
+    failMsg(x);
+  }
+}
+
+async function refreshRuntime() {
+  try {
+    await loadStatus();
+  } catch (x) {
+    st.textContent = 'Offline';
+    st.className = 'pill bad';
   }
 }
 
@@ -293,3 +302,4 @@ $('bridge_peer_index').onchange = () => {
 };
 
 load().catch(x => failMsg(x, 'Load failed'));
+setInterval(refreshRuntime, 3000);
