@@ -44,6 +44,7 @@ function notice(msg, cls = 'muted', hold = 1800) {
   clearTimeout(saveTimer);
   ss.textContent = msg;
   ss.className = `pill ${cls} save-toast`;
+  ss.classList.remove('hide');
   if (hold) saveTimer = setTimeout(() => ss.classList.add('hide'), hold);
 }
 
@@ -140,13 +141,18 @@ function collect() {
     dhcp_enabled: $('dhcp_enabled').checked ? 1 : 0,
     broker_ip: $('broker_ip').value || $('device_ip').value,
     site_id: $('site_id').value,
-    topic_prefix: cfg.topic_prefix || 'site/field-a',
+    topic_prefix: $('topic_prefix').value || cfg.topic_prefix || 'site/field-a',
     mqtt_port: +($('cfg_mqtt_port').value || cfg.mqtt_port || 1883),
     p2p_port: +($('cfg_p2p_port').value || cfg.p2p_port || 4884),
     broker_enabled: $('broker_enabled').checked ? 1 : 0,
     bridge_enabled: bridge,
     mesh_enabled: bridge,
   };
+}
+
+function setRebooting() {
+  st.textContent = 'Rebooting';
+  st.className = 'pill warn';
 }
 
 async function savePeer(i) {
@@ -211,13 +217,14 @@ async function load() {
 async function saveConfig(part) {
   try {
     notice('Saving', 'muted', 0);
-    await json('/config', {
+    const result = await json('/config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(collect()),
     });
-    if (part === 'Network') {
-      notice('Network saved, rebooting', 'muted', 0);
+    if (result.reboot_required || part === 'Network' || part === 'Broker') {
+      notice(`${part} saved, rebooting`, 'warn', 0);
+      setRebooting();
       await json('/reboot', { method: 'POST' });
       return;
     }
@@ -232,8 +239,9 @@ async function resetConfig() {
   try {
     notice('Resetting', 'muted', 0);
     await json('/config/reset', { method: 'POST' });
-    await load();
-    notice('Config reset', 'ok');
+    notice('Config reset, rebooting', 'warn', 0);
+    setRebooting();
+    await json('/reboot', { method: 'POST' });
   } catch (x) {
     failMsg(x, 'Reset failed');
   }
